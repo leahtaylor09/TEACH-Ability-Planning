@@ -55,9 +55,14 @@ th, td {
   cursor: pointer;
 }
 
+.day:hover {
+  background: #f0f0f0;
+}
+
 .disabled {
   background: #f5f5f5;
   color: #bbb;
+  cursor: default;
 }
 
 .selected {
@@ -65,6 +70,7 @@ th, td {
   color: white;
 }
 </style>
+
 </head>
 
 <body>
@@ -89,7 +95,7 @@ Click a date to mark it as unavailable. Click again to unselect.
 <h2>Contacts</h2>
 
 <p>
-Please recommend individuals who you believe would be valuable contributors to this study.
+Please recommend individuals who would be valuable contributors to this study.
 </p>
 
 <table>
@@ -107,6 +113,7 @@ Please recommend individuals who you believe would be valuable contributors to t
 <button onclick="addRow()">+ Add Person</button>
 
 <button onclick="submitData()">Submit</button>
+
 
 <script>
 
@@ -154,18 +161,18 @@ function renderMonth(name, year, month) {
     grid.appendChild(document.createElement("div"));
   }
 
-  for (let i = 1; i <= totalDays; i++) {
+  for (let d = 1; d <= totalDays; d++) {
 
-    const d = new Date(year, month, i);
-    const el = document.createElement("div");
+    let date = new Date(year, month, d);
+    let el = document.createElement("div");
 
-    el.innerText = i;
+    el.innerText = d;
 
-    if (d.getDay() === 0 || d.getDay() === 6) {
+    if (date.getDay() === 0 || date.getDay() === 6) {
       el.className = "day disabled";
     } else {
       el.className = "day";
-      const dateStr = formatDate(d);
+      let dateStr = formatDate(date);
       el.onclick = () => toggleDate(dateStr, el);
     }
 
@@ -181,24 +188,21 @@ renderMonth("September", 2026, 8);
 renderMonth("October", 2026, 9);
 
 
-// ===== CONTACTS =====
+// ===== CONTACT TABLE =====
 
 function addRow() {
 
-  const tr = document.createElement("tr");
+  let tr = document.createElement("tr");
 
-  tr.innerHTML = `
-    <td><input class="name"></td>
-    <td>
-      <select class="role">
-        <option value="">Select</option>
-        <option>Co-design Workshop</option>
-        <option>Delphi Study</option>
-      </select>
-    </td>
-    <td><input class="email"></td>
-    <td><input class="comments"></td>
-  `;
+  tr.innerHTML =
+    "<td><input class='name'></td>" +
+    "<td><select class='role'>" +
+    "<option value=''>Select</option>" +
+    "<option>Co-design Workshop</option>" +
+    "<option>Delphi Study</option>" +
+    "</select></td>" +
+    "<td><input class='email'></td>" +
+    "<td><input class='comments'></td>";
 
   document.getElementById("tableBody").appendChild(tr);
 }
@@ -206,7 +210,7 @@ function addRow() {
 addRow();
 
 
-// ===== SUBMIT (FINAL FIX) =====
+// ===== ✅ COMPLETE SUBMIT FUNCTION =====
 
 function submitData() {
 
@@ -223,11 +227,16 @@ function submitData() {
     const comments = row.querySelector(".comments").value;
 
     if (name || email) {
-      contacts.push({ name, role, email, comments });
+      contacts.push({
+        name: name,
+        role: role,
+        email: email,
+        comments: comments
+      });
     }
   });
 
-  // ✅ CRITICAL FIX: everything stays structured
+  // ✅ CRITICAL: send arrays (no join)
   const payload = {
     first_name: firstName,
     last_name: lastName,
@@ -246,6 +255,7 @@ function submitData() {
 
   form.appendChild(input);
   document.body.appendChild(form);
+
   form.submit();
 }
 
