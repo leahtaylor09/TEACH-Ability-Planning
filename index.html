@@ -6,7 +6,7 @@
 
 <style>
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   max-width: 900px;
   margin: auto;
   padding: 20px;
@@ -37,7 +37,7 @@ th, td {
   border-bottom: 1px solid #ddd;
 }
 
-/* CALENDAR */
+/* Calendar */
 
 .month {
   margin-bottom: 30px;
@@ -76,7 +76,6 @@ th, td {
   color: white;
 }
 </style>
-
 </head>
 
 <body>
@@ -89,6 +88,7 @@ th, td {
 <label>Last Name</label>
 <input id="lastName">
 
+
 <h2>Select Unavailable Dates</h2>
 
 <p>
@@ -98,6 +98,7 @@ Please disregard weekend dates.
 </p>
 
 <div id="calendar"></div>
+
 
 <h2>Contacts</h2>
 
@@ -123,9 +124,10 @@ Please recommend individuals who you believe would be valuable contributors to t
 
 <button onclick="submitData()">Submit</button>
 
+
 <script>
 
-// ✅ CALENDAR (clean stable version)
+/* CALENDAR */
 
 let selectedDates = [];
 
@@ -135,7 +137,7 @@ function formatDate(date) {
 
 function toggleDate(dateStr, el) {
   if (selectedDates.includes(dateStr)) {
-    selectedDates.splice(selectedDates.indexOf(dateStr), 1);
+    selectedDates = selectedDates.filter(d => d !== dateStr);
     el.classList.remove("selected");
   } else {
     selectedDates.push(dateStr);
@@ -156,9 +158,7 @@ function renderMonth(name, year, month) {
   const grid = document.createElement("div");
   grid.className = "calendar-grid";
 
-  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-
-  days.forEach(d => {
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
     const cell = document.createElement("div");
     cell.className = "day-header";
     cell.innerText = d;
@@ -168,7 +168,6 @@ function renderMonth(name, year, month) {
   const firstDay = new Date(year, month, 1).getDay();
   const totalDays = new Date(year, month + 1, 0).getDate();
 
-  // empty cells
   for (let i = 0; i < firstDay; i++) {
     grid.appendChild(document.createElement("div"));
   }
@@ -198,13 +197,12 @@ function renderMonth(name, year, month) {
   container.appendChild(monthDiv);
 }
 
-// ✅ Correct months
 renderMonth("August", 2026, 7);
 renderMonth("September", 2026, 8);
 renderMonth("October", 2026, 9);
 
 
-// ✅ CONTACT TABLE
+/* CONTACTS */
 
 function addRow() {
   const table = document.getElementById("tableBody");
@@ -230,7 +228,7 @@ function addRow() {
 addRow();
 
 
-// ✅ SUBMIT (unchanged)
+/* ✅ FINAL FIXED SUBMIT */
 
 function submitData() {
 
@@ -253,8 +251,7 @@ function submitData() {
   const dataString = JSON.stringify({
     first_name: firstName,
     last_name: lastName,
-    unavailable_dates: selectedDates,
-``
+    available_dates: selectedDates,   // ✅ ARRAY, NOT STRING
     contacts: contacts
   });
 
