@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Survey</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h2 {
+      margin-top: 30px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 6px;
+      margin-top: 5px;
+    }
+
+    button {
+      padding: 8px 12px;
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 8px;
+    }
+
+    /* Calendar */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+
+    .day-header {
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .day {
+      padding: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+
+    .selected {
+      background: #ff6b6b;
+      color: white;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<h2>Your Information</h2>
+
+<label>First Name</label>
+<input id="firstName">
+
+<label>Last Name</label>
+<input id="lastName">
+
+
+<h2>Select Unavailable Dates</h2>
+<div id="calendar"></div>
+
+
+<h2>Contacts</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Role</th>
+      <th>Email</th>
+      <th>Comments</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+
+<button onclick="addRow()">+ Add Person</button>
+
+
+<br><br>
+<button onclick="submitData()">Submit</button>
+
+
+<script>
+
+/* =========================
+   CALENDAR
+========================= */
+
+let selectedDates = [];
+
+function formatDate(date) {
+  return date.toISOString().split("T")[0];
+}
+
+function toggleDate(dateStr, el) {
+  if (selectedDates.includes(dateStr)) {
+    selectedDates = selectedDates.filter(d => d !== dateStr);
+    el.classList.remove("selected");
+  } else {
+    selectedDates.push(dateStr);
+    el.classList.add("selected");
+  }
+}
+
+function renderMonth(name, start, end) {
+
+  const container = document.getElementById("calendar");
+
+  const title = document.createElement("h3");
+  title.innerText = name + " 2026";
+
+  const grid = document.createElement("div");
+  grid.className = "calendar-grid";
+
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  days.forEach(d => {
+    const cell = document.createElement("div");
+    cell.className = "day-header";
+    cell.innerText = d;
+    grid.appendChild(cell);
+  });
+
+  let current = new Date(start);
+  const endDate = new Date(end);
+
+  while (current <= endDate) {
+    const el = document.createElement("div");
+    const dateStr = formatDate(current);
+
+    el.innerText = current.getDate();
+    el.className = "day";
+
+    el.onclick = () => toggleDate(dateStr, el);
+
+    grid.appendChild(el);
+    current.setDate(current.getDate() + 1);
+  }
+
+  container.appendChild(title);
+  container.appendChild(grid);
+}
+
+renderMonth("August", "2026-08-01", "2026-08-31");
+renderMonth("September", "2026-09-01", "2026-09-30");
+renderMonth("October", "2026-10-01", "2026-10-31");
+
+
+/* =========================
+   CONTACT TABLE
+========================= */
+
+function addRow() {
+
+  const table = document.getElementById("tableBody");
+
+  const row = document.createElement("tr");
+
+  row.innerHTML = `
+    <td><input class="name"></td>
+    <td>
+      <select class="role">
+        <option value="">Select</option>
+        <option>Co-design Workshop</option>
+        <option>Delphi Study</option>
+      </select>
+    </td>
+    <td><input class="email"></td>
+    <td><input class="comments"></td>
+  `;
+
+  table.appendChild(row);
+}
+
+// start with one row
+addRow();
+
+
+/* =========================
+   SUBMIT DATA
+========================= */
+
+function submitData() {
+
+  const firstName = document.getElementById("firstName").value;
+  const lastName = document.getElementById("lastName").value;
+
+  let contacts = [];
+
+  document.querySelectorAll("#tableBody tr").forEach(row => {
+    const name = row.querySelector(".name").value;
+    const role = row.querySelector(".role").value;
+    const email = row.querySelector(".email").value;
+    const comments = row.querySelector(".comments").value;
+
+    if (name || email) {
+      contacts.push({ name, role, email, comments });
+    }
+  });
+
+  const data = {
+    first_name: firstName,
+    last_name: lastName,
+    unavailable_dates: selectedDates.join(","),
+    contacts: contacts
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbwpBOfUCNzvqt_tCcrjl7KO06H7klq4vGyRblpfdnj116LLxu_XRHYzJEog6L-cGSDn/exec", {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+  .then(() => alert("Submitted successfully"));
+}
+
+</script>
+
+</body>
+</html>
