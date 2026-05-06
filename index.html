@@ -1,38 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>Survey</title>
+  <meta charset="utf-8">
+  <title>Survey</title>
 
-  <style>
-    body { font-family: Arial; max-width: 800px; margin: auto; padding: 20px; }
-    h2 { margin-top: 25px; }
-    p { margin-bottom: 15px; }
+  <style>
+    body { font-family: Arial; max-width: 800px; margin: auto; padding: 20px; }
+    h2 { margin-top: 25px; }
+    p { margin-bottom: 15px; }
 
-    input, select { width: 100%; padding: 6px; margin-top: 5px; }
-    button { padding: 10px; margin-top: 10px; cursor: pointer; }
+    input, select { width: 100%; padding: 6px; margin-top: 5px; }
+    button { padding: 10px; margin-top: 10px; cursor: pointer; }
 
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border-bottom: 1px solid #ddd; padding: 8px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #ddd; padding: 8px; }
 
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
 
-    .day-header { text-align: center; font-weight: bold; }
+    .day-header { text-align: center; font-weight: bold; }
 
-    .day {
-      padding: 8px;
-      border: 1px solid #ccc;
-      text-align: center;
-      cursor: pointer;
-    }
+    .day {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: center;
+      cursor: pointer;
+    }
 
-    .disabled { background: #f0f0f0; color: #bbb; cursor: default; }
-    .selected { background: #ff6b6b; color: white; }
-  </style>
+    .disabled { background: #f0f0f0; color: #bbb; cursor: default; }
+    .selected { background: #ff6b6b; color: white; }
+  </style>
 </head>
 
 <body>
@@ -66,15 +66,15 @@ You may add as many individuals as you wish.
 </p>
 
 <table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Role</th>
-      <th>Email</th>
-      <th>Comments</th>
-    </tr>
-  </thead>
-  <tbody id="tableBody"></tbody>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Role</th>
+      <th>Email</th>
+      <th>Comments</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
 </table>
 
 <button onclick="addRow()">+ Add Person</button>
@@ -85,69 +85,68 @@ You may add as many individuals as you wish.
 
 <script>
 
-// CALENDAR
 let selectedDates = [];
 
 function formatDate(date) {
-  return date.toISOString().split("T")[0];
+  return date.toISOString().split("T")[0];
 }
 
 function toggleDate(dateStr, el) {
-  if (selectedDates.includes(dateStr)) {
-    selectedDates = selectedDates.filter(d => d !== dateStr);
-    el.classList.remove("selected");
-  } else {
-    selectedDates.push(dateStr);
-    el.classList.add("selected");
-  }
+  if (selectedDates.includes(dateStr)) {
+    selectedDates = selectedDates.filter(d => d !== dateStr);
+    el.classList.remove("selected");
+  } else {
+    selectedDates.push(dateStr);
+    el.classList.add("selected");
+  }
 }
 
 function renderMonth(name, start, end) {
 
-  const container = document.getElementById("calendar");
+  const container = document.getElementById("calendar");
 
-  const title = document.createElement("h3");
-  title.innerText = name + " 2026";
+  const title = document.createElement("h3");
+  title.innerText = name + " 2026";
 
-  const grid = document.createElement("div");
-  grid.className = "calendar-grid";
+  const grid = document.createElement("div");
+  grid.className = "calendar-grid";
 
-  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
-    const cell = document.createElement("div");
-    cell.className = "day-header";
-    cell.innerText = d;
-    grid.appendChild(cell);
-  });
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
+    const cell = document.createElement("div");
+    cell.className = "day-header";
+    cell.innerText = d;
+    grid.appendChild(cell);
+  });
 
-  const startDate = new Date(start);
-  const endDate = new Date(end);
+  const startDate = new Date(start);
+  const endDate = new Date(end);
 
-  for (let i = 0; i < startDate.getDay(); i++) {
-    grid.appendChild(document.createElement("div"));
-  }
+  for (let i = 0; i < startDate.getDay(); i++) {
+    grid.appendChild(document.createElement("div"));
+  }
 
-  let current = new Date(startDate);
+  let current = new Date(startDate);
 
-  while (current <= endDate) {
-    const el = document.createElement("div");
-    const dateStr = formatDate(current);
-    const day = current.getDay();
+  while (current <= endDate) {
+    const el = document.createElement("div");
+    const dateStr = formatDate(current);
+    const day = current.getDay();
 
-    el.innerText = current.getDate();
+    el.innerText = current.getDate();
 
-    if (day === 0 || day === 6) {
-      el.className = "day disabled";
-    } else {
-      el.className = "day";
-      el.onclick = () => toggleDate(dateStr, el);
-    }
+    if (day === 0 || day === 6) {
+      el.className = "day disabled";
+    } else {
+      el.className = "day";
+      el.onclick = () => toggleDate(dateStr, el);
+    }
 
-    grid.appendChild(el);
-    current.setDate(current.getDate() + 1);
-  }
+    grid.appendChild(el);
+    current.setDate(current.getDate() + 1);
+  }
 
-  container.appendChild(title);
-  container.appendChild(grid);
+  container.appendChild(title);
+  container.appendChild(grid);
 }
 
 renderMonth("August", "2026-08-01", "2026-08-31");
@@ -155,70 +154,68 @@ renderMonth("September", "2026-09-01", "2026-09-30");
 renderMonth("October", "2026-10-01", "2026-10-31");
 
 
-// CONTACTS
 function addRow() {
-  const table = document.getElementById("tableBody");
+  const table = document.getElementById("tableBody");
 
-  const row = document.createElement("tr");
+  const row = document.createElement("tr");
 
-  row.innerHTML = `
-    <td><input class="name"></td>
-    <td>
-      <select class="role">
-        <option value="">Select</option>
-        <option>Co-design Workshop</option>
-        <option>Delphi Study</option>
-      </select>
-    </td>
-    <td><input class="email"></td>
-    <td><input class="comments"></td>
-  `;
+  row.innerHTML = `
+    <td><input class="name"></td>
+    <td>
+      <select class="role">
+        <option value="">Select</option>
+        <option>Co-design Workshop</option>
+        <option>Delphi Study</option>
+      </select>
+    </td>
+    <td><input class="email"></td>
+    <td><input class="comments"></td>
+  `;
 
-  table.appendChild(row);
+  table.appendChild(row);
 }
 
 addRow();
 
 
-// SUBMIT
 function submitData() {
 
-  const firstName = document.getElementById("firstName").value;
-  const lastName = document.getElementById("lastName").value;
+  const firstName = document.getElementById("firstName").value;
+  const lastName = document.getElementById("lastName").value;
 
-  let contacts = [];
+  let contacts = [];
 
-  document.querySelectorAll("#tableBody tr").forEach(row => {
-    const name = row.querySelector(".name").value;
-    const role = row.querySelector(".role").value;
-    const email = row.querySelector(".email").value;
-    const comments = row.querySelector(".comments").value;
+  document.querySelectorAll("#tableBody tr").forEach(row => {
+    const name = row.querySelector(".name").value;
+    const role = row.querySelector(".role").value;
+    const email = row.querySelector(".email").value;
+    const comments = row.querySelector(".comments").value;
 
-    if (name || email) {
-      contacts.push({ name, role, email, comments });
-    }
-  });
+    if (name || email) {
+      contacts.push({ name, role, email, comments });
+    }
+  });
 
-  const dataString = JSON.stringify({
-    first_name: firstName,
-    last_name: lastName,
-    unavailable_dates: selectedDates.join(","),
-    contacts: contacts
-  });
+  const dataString = JSON.stringify({
+    first_name: firstName,
+    last_name: lastName,
+    unavailable_dates: selectedDates.join(","),
+    contacts: contacts
+  });
 
-  const form = document.createElement("form");
-  form.method = "POST";
-  form.action = "https://script.google.com/macros/s/AKfycby6kRP0selr_mxvaonNQLJR-sWtl845EX4qnP4rENbUcLftTky948ERqBorY9jLIK4w/exec";
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = "https://script.google.com/macros/s/AKfycby6kRP0selr_mxvaonNQLJR-sWtl845EX4qnP4rENbUcLftTky948ERqBorY9jLIK4w/exec";
 
-  const input = document.createElement("input");
-  input.type = "hidden";
-  input.name = "data";
-  input.value = dataString;
+  const input = document.createElement("input");
+  input.type = "hidden";
+  input.name = "data";
+  input.value = dataString;
 
-  form.appendChild(input);
-  document.body.appendChild(form);
+  form.appendChild(input);
+  document.body.appendChild(form);
 
-  form.submit();
+  form.submit();
 }
 
 </script>
