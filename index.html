@@ -5,15 +5,8 @@
 <title>Survey</title>
 
 <style>
-body {
-  font-family: Arial;
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
-}
-
+body { font-family: Arial; max-width: 900px; margin: auto; padding: 20px; }
 h2 { margin-top: 30px; }
-p { margin-bottom: 20px; }
 
 input, select {
   width: 100%;
@@ -55,10 +48,6 @@ th, td {
   cursor: pointer;
 }
 
-.day:hover {
-  background: #f0f0f0;
-}
-
 .disabled {
   background: #f5f5f5;
   color: #bbb;
@@ -69,7 +58,6 @@ th, td {
   color: white;
 }
 </style>
-
 </head>
 
 <body>
@@ -83,11 +71,6 @@ th, td {
 <input id="lastName">
 
 <h2>Select Unavailable Dates</h2>
-
-<p>
-Select all weekday dates you are NOT available.
-</p>
-
 <div id="calendar"></div>
 
 <h2>Contacts</h2>
@@ -103,12 +86,11 @@ Select all weekday dates you are NOT available.
 </table>
 
 <button onclick="addRow()">+ Add Person</button>
-
 <button onclick="submitData()">Submit</button>
 
 <script>
 
-// CALENDAR
+// ===== CALENDAR =====
 let selectedDates = [];
 
 function formatDate(d) {
@@ -161,7 +143,7 @@ function renderMonth(name, year, month) {
     } else {
       el.className = "day";
       let dateStr = formatDate(date);
-      el.onclick = () => toggleDate(dateStr, el);
+      el.onclick = function() { toggleDate(dateStr, el); };
     }
 
     grid.appendChild(el);
@@ -176,9 +158,11 @@ renderMonth("September", 2026, 8);
 renderMonth("October", 2026, 9);
 
 
-// CONTACT TABLE
+// ===== CONTACT TABLE =====
+
 function addRow() {
-  const tr = document.createElement("tr");
+
+  var tr = document.createElement("tr");
 
   tr.innerHTML =
     "<td><input class='name'></td>" +
@@ -196,37 +180,39 @@ function addRow() {
 addRow();
 
 
-// ✅ SUBMIT (THIS IS THE FIX)
+// ===== FINAL SUBMIT =====
+
 function submitData() {
 
-  const form = document.createElement("form");
+  var form = document.createElement("form");
   form.method = "POST";
-  form.action = "https://script.google.com/macros/s/AKfycby6kRP0selr_mxvaonNQLJR-sWtl845EX4qnP4rENbUcLftTky948ERqBorY9jLIK4w/exec";
+  form.action = "https://script.google.com/macros/s/AKfycbxcQp55Y9ehGHk4HmGnwBB7Up7vrbElwe0-RnEZZxSFD_rYrH2ogpOBIZVlLKkHK6C9/exec";
 
   form.appendChild(createInput("first_name", document.getElementById("firstName").value));
   form.appendChild(createInput("last_name", document.getElementById("lastName").value));
 
-  // ✅ send dates separately (KEY FIX)
-  selectedDates.forEach((d, i) => {
-    form.appendChild(createInput("date_" + i, d));
-  });
+  // Dates
+  for (var i = 0; i < selectedDates.length; i++) {
+    form.appendChild(createInput("date_" + i, selectedDates[i]));
+  }
 
-  // ✅ send contacts separately (KEY FIX)
-  document.querySelectorAll("#tableBody tr").forEach((row, i) => {
+  // Contacts
+  var rows = document.querySelectorAll("#tableBody tr");
 
-    form.appendChild(createInput("contact_" + i + "_name", row.querySelector(".name").value));
-    form.appendChild(createInput("contact_" + i + "_role", row.querySelector(".role").value));
-    form.appendChild(createInput("contact_" + i + "_email", row.querySelector(".email").value));
-    form.appendChild(createInput("contact_" + i + "_comments", row.querySelector(".comments").value));
+  for (var r = 0; r < rows.length; r++) {
 
-  });
+    form.appendChild(createInput("contact_" + r + "_name", rows[r].querySelector(".name").value));
+    form.appendChild(createInput("contact_" + r + "_role", rows[r].querySelector(".role").value));
+    form.appendChild(createInput("contact_" + r + "_email", rows[r].querySelector(".email").value));
+    form.appendChild(createInput("contact_" + r + "_comments", rows[r].querySelector(".comments").value));
+  }
 
   document.body.appendChild(form);
   form.submit();
 }
 
 function createInput(name, value) {
-  const input = document.createElement("input");
+  var input = document.createElement("input");
   input.type = "hidden";
   input.name = name;
   input.value = value || "";
