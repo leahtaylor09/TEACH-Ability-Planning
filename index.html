@@ -37,12 +37,6 @@ th, td {
   border-bottom: 1px solid #ddd;
 }
 
-/* Calendar */
-
-.month {
-  margin-bottom: 30px;
-}
-
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -61,14 +55,9 @@ th, td {
   cursor: pointer;
 }
 
-.day:hover {
-  background: #f0f0f0;
-}
-
 .disabled {
   background: #f5f5f5;
   color: #bbb;
-  cursor: default;
 }
 
 .selected {
@@ -88,17 +77,14 @@ th, td {
 <label>Last Name</label>
 <input id="lastName">
 
-
 <h2>Select Unavailable Dates</h2>
 
 <p>
 Please select all weekday dates between August and October when you are NOT available to meet in Toronto.
-Click a date to mark it as unavailable. Click again to unselect.<br><br>
-Please disregard weekend dates.
+Click a date to mark it as unavailable. Click again to unselect.
 </p>
 
 <div id="calendar"></div>
-
 
 <h2>Contacts</h2>
 
@@ -120,27 +106,24 @@ Please recommend individuals who you believe would be valuable contributors to t
 
 <button onclick="addRow()">+ Add Person</button>
 
-<br>
-
 <button onclick="submitData()">Submit</button>
-
 
 <script>
 
-/* CALENDAR */
+// ===== CALENDAR =====
 
 let selectedDates = [];
 
-function formatDate(date) {
-  return date.toISOString().split("T")[0];
+function formatDate(d) {
+  return d.toISOString().split("T")[0];
 }
 
-function toggleDate(dateStr, el) {
-  if (selectedDates.includes(dateStr)) {
-    selectedDates = selectedDates.filter(d => d !== dateStr);
+function toggleDate(date, el) {
+  if (selectedDates.includes(date)) {
+    selectedDates = selectedDates.filter(x => x !== date);
     el.classList.remove("selected");
   } else {
-    selectedDates.push(dateStr);
+    selectedDates.push(date);
     el.classList.add("selected");
   }
 }
@@ -149,20 +132,19 @@ function renderMonth(name, year, month) {
 
   const container = document.getElementById("calendar");
 
-  const monthDiv = document.createElement("div");
-  monthDiv.className = "month";
-
   const title = document.createElement("h3");
   title.innerText = name + " " + year;
 
   const grid = document.createElement("div");
   grid.className = "calendar-grid";
 
-  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
-    const cell = document.createElement("div");
-    cell.className = "day-header";
-    cell.innerText = d;
-    grid.appendChild(cell);
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+  days.forEach(d => {
+    const el = document.createElement("div");
+    el.className = "day-header";
+    el.innerText = d;
+    grid.appendChild(el);
   });
 
   const firstDay = new Date(year, month, 1).getDay();
@@ -172,29 +154,26 @@ function renderMonth(name, year, month) {
     grid.appendChild(document.createElement("div"));
   }
 
-  for (let day = 1; day <= totalDays; day++) {
+  for (let i = 1; i <= totalDays; i++) {
 
-    const current = new Date(year, month, day);
-    const dayOfWeek = current.getDay();
-
+    const d = new Date(year, month, i);
     const el = document.createElement("div");
-    el.innerText = day;
 
-    const dateStr = formatDate(current);
+    el.innerText = i;
 
-    if (dayOfWeek === 0 || dayOfWeek === 6) {
+    if (d.getDay() === 0 || d.getDay() === 6) {
       el.className = "day disabled";
     } else {
       el.className = "day";
+      const dateStr = formatDate(d);
       el.onclick = () => toggleDate(dateStr, el);
     }
 
     grid.appendChild(el);
   }
 
-  monthDiv.appendChild(title);
-  monthDiv.appendChild(grid);
-  container.appendChild(monthDiv);
+  container.appendChild(title);
+  container.appendChild(grid);
 }
 
 renderMonth("August", 2026, 7);
@@ -202,14 +181,13 @@ renderMonth("September", 2026, 8);
 renderMonth("October", 2026, 9);
 
 
-/* CONTACTS */
+// ===== CONTACTS =====
 
 function addRow() {
-  const table = document.getElementById("tableBody");
 
-  const row = document.createElement("tr");
+  const tr = document.createElement("tr");
 
-  row.innerHTML = `
+  tr.innerHTML = `
     <td><input class="name"></td>
     <td>
       <select class="role">
@@ -222,13 +200,13 @@ function addRow() {
     <td><input class="comments"></td>
   `;
 
-  table.appendChild(row);
+  document.getElementById("tableBody").appendChild(tr);
 }
 
 addRow();
 
 
-/* ✅ FINAL FIXED SUBMIT */
+// ===== SUBMIT (FINAL FIX) =====
 
 function submitData() {
 
@@ -238,6 +216,7 @@ function submitData() {
   let contacts = [];
 
   document.querySelectorAll("#tableBody tr").forEach(row => {
+
     const name = row.querySelector(".name").value;
     const role = row.querySelector(".role").value;
     const email = row.querySelector(".email").value;
@@ -248,12 +227,13 @@ function submitData() {
     }
   });
 
-  const dataString = JSON.stringify({
+  // ✅ CRITICAL FIX: everything stays structured
+  const payload = {
     first_name: firstName,
     last_name: lastName,
-    available_dates: selectedDates,   // ✅ ARRAY, NOT STRING
+    unavailable_dates: selectedDates,
     contacts: contacts
-  });
+  };
 
   const form = document.createElement("form");
   form.method = "POST";
@@ -262,11 +242,10 @@ function submitData() {
   const input = document.createElement("input");
   input.type = "hidden";
   input.name = "data";
-  input.value = dataString;
+  input.value = JSON.stringify(payload);
 
   form.appendChild(input);
   document.body.appendChild(form);
-
   form.submit();
 }
 
