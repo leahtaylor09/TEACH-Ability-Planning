@@ -13,7 +13,7 @@ body {
 }
 
 h2 { margin-top: 30px; }
-p { margin-bottom: 20px; line-height: 1.5; }
+p { margin-bottom: 20px; }
 
 input, select {
   width: 100%;
@@ -30,22 +30,17 @@ button {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
-}
-
-th {
-  background: #f5f5f5;
 }
 
 th, td {
-  border-bottom: 1px solid #ddd;
   padding: 8px;
+  border-bottom: 1px solid #ddd;
 }
 
 /* CALENDAR */
 
 .month {
-  margin-bottom: 25px;
+  margin-bottom: 30px;
 }
 
 .calendar-grid {
@@ -64,7 +59,6 @@ th, td {
   border: 1px solid #ccc;
   text-align: center;
   cursor: pointer;
-  background: white;
 }
 
 .day:hover {
@@ -108,9 +102,7 @@ Please disregard weekend dates.
 <h2>Contacts</h2>
 
 <p>
-Please recommend individuals who you believe would be valuable contributors to this study.<br><br>
-For each person, indicate whether they would be best suited for the co-design workshop or the Delphi study.<br><br>
-You may add as many individuals as you wish.
+Please recommend individuals who you believe would be valuable contributors to this study.
 </p>
 
 <table>
@@ -133,6 +125,8 @@ You may add as many individuals as you wish.
 
 <script>
 
+// ✅ CALENDAR (clean stable version)
+
 let selectedDates = [];
 
 function formatDate(date) {
@@ -141,7 +135,7 @@ function formatDate(date) {
 
 function toggleDate(dateStr, el) {
   if (selectedDates.includes(dateStr)) {
-    selectedDates = selectedDates.filter(d => d !== dateStr);
+    selectedDates.splice(selectedDates.indexOf(dateStr), 1);
     el.classList.remove("selected");
   } else {
     selectedDates.push(dateStr);
@@ -149,7 +143,7 @@ function toggleDate(dateStr, el) {
   }
 }
 
-function renderMonth(name, start, end) {
+function renderMonth(name, year, month) {
 
   const container = document.getElementById("calendar");
 
@@ -157,36 +151,39 @@ function renderMonth(name, start, end) {
   monthDiv.className = "month";
 
   const title = document.createElement("h3");
-  title.innerText = name + " 2026";
+  title.innerText = name + " " + year;
 
   const grid = document.createElement("div");
   grid.className = "calendar-grid";
 
-  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+  days.forEach(d => {
     const cell = document.createElement("div");
     cell.className = "day-header";
     cell.innerText = d;
     grid.appendChild(cell);
   });
 
-  const startDate = new Date(start);
-  const endDate = new Date(end);
+  const firstDay = new Date(year, month, 1).getDay();
+  const totalDays = new Date(year, month + 1, 0).getDate();
 
-  for (let i = 0; i < startDate.getDay(); i++) {
+  // empty cells
+  for (let i = 0; i < firstDay; i++) {
     grid.appendChild(document.createElement("div"));
   }
 
-  let current = new Date(startDate);
+  for (let day = 1; day <= totalDays; day++) {
 
-  while (current <= endDate) {
+    const current = new Date(year, month, day);
+    const dayOfWeek = current.getDay();
 
     const el = document.createElement("div");
+    el.innerText = day;
+
     const dateStr = formatDate(current);
-    const day = current.getDay();
 
-    el.innerText = current.getDate();
-
-    if (day === 0 || day === 6) {
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
       el.className = "day disabled";
     } else {
       el.className = "day";
@@ -194,7 +191,6 @@ function renderMonth(name, start, end) {
     }
 
     grid.appendChild(el);
-    current.setDate(current.getDate() + 1);
   }
 
   monthDiv.appendChild(title);
@@ -202,9 +198,13 @@ function renderMonth(name, start, end) {
   container.appendChild(monthDiv);
 }
 
-renderMonth("August", "2026-08-01", "2026-08-31");
-renderMonth("September", "2026-09-01", "2026-09-30");
-renderMonth("October", "2026-10-01", "2026-10-31");
+// ✅ Correct months
+renderMonth("August", 2026, 7);
+renderMonth("September", 2026, 8);
+renderMonth("October", 2026, 9);
+
+
+// ✅ CONTACT TABLE
 
 function addRow() {
   const table = document.getElementById("tableBody");
@@ -229,6 +229,9 @@ function addRow() {
 
 addRow();
 
+
+// ✅ SUBMIT (unchanged)
+
 function submitData() {
 
   const firstName = document.getElementById("firstName").value;
@@ -237,4 +240,39 @@ function submitData() {
   let contacts = [];
 
   document.querySelectorAll("#tableBody tr").forEach(row => {
-    const name = row
+    const name = row.querySelector(".name").value;
+    const role = row.querySelector(".role").value;
+    const email = row.querySelector(".email").value;
+    const comments = row.querySelector(".comments").value;
+
+    if (name || email) {
+      contacts.push({ name, role, email, comments });
+    }
+  });
+
+  const dataString = JSON.stringify({
+    first_name: firstName,
+    last_name: lastName,
+    unavailable_dates: selectedDates.join(","),
+    contacts: contacts
+  });
+
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = "https://script.google.com/macros/s/AKfycby6kRP0selr_mxvaonNQLJR-sWtl845EX4qnP4rENbUcLftTky948ERqBorY9jLIK4w/exec";
+
+  const input = document.createElement("input");
+  input.type = "hidden";
+  input.name = "data";
+  input.value = dataString;
+
+  form.appendChild(input);
+  document.body.appendChild(form);
+
+  form.submit();
+}
+
+</script>
+
+</body>
+</html>
