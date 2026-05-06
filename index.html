@@ -253,7 +253,8 @@ function submitData() {
   const dataString = JSON.stringify({
     first_name: firstName,
     last_name: lastName,
-    unavailable_dates: selectedDates.join(","),
+    unavailable_dates: selectedDates,
+``
     contacts: contacts
   });
 
