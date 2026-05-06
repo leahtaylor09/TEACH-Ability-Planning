@@ -62,7 +62,6 @@ th, td {
 .disabled {
   background: #f5f5f5;
   color: #bbb;
-  cursor: default;
 }
 
 .selected {
@@ -86,27 +85,20 @@ th, td {
 <h2>Select Unavailable Dates</h2>
 
 <p>
-Please select all weekday dates between August and October when you are NOT available to meet in Toronto.
-Click a date to mark it as unavailable. Click again to unselect.
+Select all weekday dates you are NOT available.
 </p>
 
 <div id="calendar"></div>
 
 <h2>Contacts</h2>
 
-<p>
-Please recommend individuals who would be valuable contributors to this study.
-</p>
-
 <table>
-<thead>
 <tr>
 <th>Name</th>
 <th>Role</th>
 <th>Email</th>
 <th>Comments</th>
 </tr>
-</thead>
 <tbody id="tableBody"></tbody>
 </table>
 
@@ -114,11 +106,9 @@ Please recommend individuals who would be valuable contributors to this study.
 
 <button onclick="submitData()">Submit</button>
 
-
 <script>
 
-// ===== CALENDAR =====
-
+// CALENDAR
 let selectedDates = [];
 
 function formatDate(d) {
@@ -145,9 +135,7 @@ function renderMonth(name, year, month) {
   const grid = document.createElement("div");
   grid.className = "calendar-grid";
 
-  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-
-  days.forEach(d => {
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
     const el = document.createElement("div");
     el.className = "day-header";
     el.innerText = d;
@@ -188,11 +176,9 @@ renderMonth("September", 2026, 8);
 renderMonth("October", 2026, 9);
 
 
-// ===== CONTACT TABLE =====
-
+// CONTACT TABLE
 function addRow() {
-
-  let tr = document.createElement("tr");
+  const tr = document.createElement("tr");
 
   tr.innerHTML =
     "<td><input class='name'></td>" +
@@ -210,53 +196,41 @@ function addRow() {
 addRow();
 
 
-// ===== ✅ COMPLETE SUBMIT FUNCTION =====
-
+// ✅ SUBMIT (THIS IS THE FIX)
 function submitData() {
-
-  const firstName = document.getElementById("firstName").value;
-  const lastName = document.getElementById("lastName").value;
-
-  let contacts = [];
-
-  document.querySelectorAll("#tableBody tr").forEach(row => {
-
-    const name = row.querySelector(".name").value;
-    const role = row.querySelector(".role").value;
-    const email = row.querySelector(".email").value;
-    const comments = row.querySelector(".comments").value;
-
-    if (name || email) {
-      contacts.push({
-        name: name,
-        role: role,
-        email: email,
-        comments: comments
-      });
-    }
-  });
-
-  // ✅ CRITICAL: send arrays (no join)
-  const payload = {
-    first_name: firstName,
-    last_name: lastName,
-    unavailable_dates: selectedDates,
-    contacts: contacts
-  };
 
   const form = document.createElement("form");
   form.method = "POST";
   form.action = "https://script.google.com/macros/s/AKfycby6kRP0selr_mxvaonNQLJR-sWtl845EX4qnP4rENbUcLftTky948ERqBorY9jLIK4w/exec";
 
+  form.appendChild(createInput("first_name", document.getElementById("firstName").value));
+  form.appendChild(createInput("last_name", document.getElementById("lastName").value));
+
+  // ✅ send dates separately (KEY FIX)
+  selectedDates.forEach((d, i) => {
+    form.appendChild(createInput("date_" + i, d));
+  });
+
+  // ✅ send contacts separately (KEY FIX)
+  document.querySelectorAll("#tableBody tr").forEach((row, i) => {
+
+    form.appendChild(createInput("contact_" + i + "_name", row.querySelector(".name").value));
+    form.appendChild(createInput("contact_" + i + "_role", row.querySelector(".role").value));
+    form.appendChild(createInput("contact_" + i + "_email", row.querySelector(".email").value));
+    form.appendChild(createInput("contact_" + i + "_comments", row.querySelector(".comments").value));
+
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
+function createInput(name, value) {
   const input = document.createElement("input");
   input.type = "hidden";
-  input.name = "data";
-  input.value = JSON.stringify(payload);
-
-  form.appendChild(input);
-  document.body.appendChild(form);
-
-  form.submit();
+  input.name = name;
+  input.value = value || "";
+  return input;
 }
 
 </script>
