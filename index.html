@@ -13,7 +13,7 @@
     }
 
     h2 {
-      margin-top: 30px;
+      margin-top: 25px;
     }
 
     input, select {
@@ -23,8 +23,9 @@
     }
 
     button {
-      padding: 8px 12px;
+      padding: 10px 15px;
       margin-top: 10px;
+      cursor: pointer;
     }
 
     table {
@@ -37,11 +38,11 @@
       padding: 8px;
     }
 
-    /* Calendar */
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 5px;
+      margin-bottom: 20px;
     }
 
     .day-header {
@@ -53,6 +54,7 @@
       padding: 8px;
       border: 1px solid #ccc;
       cursor: pointer;
+      text-align: center;
     }
 
     .selected {
@@ -94,8 +96,8 @@
 
 <button onclick="addRow()">+ Add Person</button>
 
-
 <br><br>
+
 <button onclick="submitData()">Submit</button>
 
 
@@ -190,12 +192,12 @@ function addRow() {
   table.appendChild(row);
 }
 
-// start with one row
+// Start with one row
 addRow();
 
 
 /* =========================
-   SUBMIT DATA
+   SUBMIT FUNCTION (WORKING)
 ========================= */
 
 function submitData() {
@@ -216,18 +218,27 @@ function submitData() {
     }
   });
 
-  const data = {
+  const dataString = JSON.stringify({
     first_name: firstName,
     last_name: lastName,
     unavailable_dates: selectedDates.join(","),
     contacts: contacts
-  };
+  });
 
-  fetch("https://script.google.com/macros/s/AKfycbwpBOfUCNzvqt_tCcrjl7KO06H7klq4vGyRblpfdnj116LLxu_XRHYzJEog6L-cGSDn/exec", {
-    method: "POST",
-    body: JSON.stringify(data)
-  })
-  .then(() => alert("Submitted successfully"));
+  // ✅ WORKING METHOD (NO CORS ISSUES)
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = "https://script.google.com/macros/s/AKfycby6kRP0selr_mxvaonNQLJR-sWtl845EX4qnP4rENbUcLftTky948ERqBorY9jLIK4w/exec";
+
+  const input = document.createElement("input");
+  input.type = "hidden";
+  input.name = "data";
+  input.value = dataString;
+
+  form.appendChild(input);
+  document.body.appendChild(form);
+
+  form.submit();
 }
 
 </script>
