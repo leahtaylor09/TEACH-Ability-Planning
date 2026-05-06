@@ -1,247 +1,291 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>Survey</title>
-
-  <style>
-    body {
-      font-family: Arial;
-      max-width: 800px;
-      margin: auto;
-      padding: 20px;
-    }
-
-    h2 {
-      margin-top: 25px;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 6px;
-      margin-top: 5px;
-    }
-
-    button {
-      padding: 10px 15px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 8px;
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-      margin-bottom: 20px;
-    }
-
-    .day-header {
-      text-align: center;
-      font-weight: bold;
-    }
-
-    .day {
-      padding: 8px;
-      border: 1px solid #ccc;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .selected {
-      background: #ff6b6b;
-      color: white;
-    }
-
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.4">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; color: #ffffff; -webkit-text-stroke: #ffffff}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; color: #ffffff; -webkit-text-stroke: #ffffff; min-height: 14.0px}
+    span.s1 {font-kerning: none}
   </style>
 </head>
-
 <body>
-
-<h2>Your Information</h2>
-
-<label>First Name</label>
-<input id="firstName">
-
-<label>Last Name</label>
-<input id="lastName">
-
-
-<h2>Select Unavailable Dates</h2>
-<div id="calendar"></div>
-
-
-<h2>Contacts</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Role</th>
-      <th>Email</th>
-      <th>Comments</th>
-    </tr>
-  </thead>
-  <tbody id="tableBody"></tbody>
-</table>
-
-<button onclick="addRow()">+ Add Person</button>
-
-<br><br>
-
-<button onclick="submitData()">Submit</button>
-
-
-<script>
-
-/* =========================
-   CALENDAR
-========================= */
-
-let selectedDates = [];
-
-function formatDate(date) {
-  return date.toISOString().split("T")[0];
-}
-
-function toggleDate(dateStr, el) {
-  if (selectedDates.includes(dateStr)) {
-    selectedDates = selectedDates.filter(d => d !== dateStr);
-    el.classList.remove("selected");
-  } else {
-    selectedDates.push(dateStr);
-    el.classList.add("selected");
-  }
-}
-
-function renderMonth(name, start, end) {
-
-  const container = document.getElementById("calendar");
-
-  const title = document.createElement("h3");
-  title.innerText = name + " 2026";
-
-  const grid = document.createElement("div");
-  grid.className = "calendar-grid";
-
-  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  days.forEach(d => {
-    const cell = document.createElement("div");
-    cell.className = "day-header";
-    cell.innerText = d;
-    grid.appendChild(cell);
-  });
-
-  let current = new Date(start);
-  const endDate = new Date(end);
-
-  while (current <= endDate) {
-    const el = document.createElement("div");
-    const dateStr = formatDate(current);
-
-    el.innerText = current.getDate();
-    el.className = "day";
-
-    el.onclick = () => toggleDate(dateStr, el);
-
-    grid.appendChild(el);
-    current.setDate(current.getDate() + 1);
-  }
-
-  container.appendChild(title);
-  container.appendChild(grid);
-}
-
-renderMonth("August", "2026-08-01", "2026-08-31");
-renderMonth("September", "2026-09-01", "2026-09-30");
-renderMonth("October", "2026-10-01", "2026-10-31");
-
-
-/* =========================
-   CONTACT TABLE
-========================= */
-
-function addRow() {
-
-  const table = document.getElementById("tableBody");
-
-  const row = document.createElement("tr");
-
-  row.innerHTML = `
-    <td><input class="name"></td>
-    <td>
-      <select class="role">
-        <option value="">Select</option>
-        <option>Co-design Workshop</option>
-        <option>Delphi Study</option>
-      </select>
-    </td>
-    <td><input class="email"></td>
-    <td><input class="comments"></td>
-  `;
-
-  table.appendChild(row);
-}
-
-// Start with one row
-addRow();
-
-
-/* =========================
-   SUBMIT FUNCTION (WORKING)
-========================= */
-
-function submitData() {
-
-  const firstName = document.getElementById("firstName").value;
-  const lastName = document.getElementById("lastName").value;
-
-  let contacts = [];
-
-  document.querySelectorAll("#tableBody tr").forEach(row => {
-    const name = row.querySelector(".name").value;
-    const role = row.querySelector(".role").value;
-    const email = row.querySelector(".email").value;
-    const comments = row.querySelector(".comments").value;
-
-    if (name || email) {
-      contacts.push({ name, role, email, comments });
-    }
-  });
-
-  const dataString = JSON.stringify({
-    first_name: firstName,
-    last_name: lastName,
-    unavailable_dates: selectedDates.join(","),
-    contacts: contacts
-  });
-
-  // ✅ WORKING METHOD (NO CORS ISSUES)
-  const form = document.createElement("form");
-  form.method = "POST";
-  form.action = "https://script.google.com/macros/s/AKfycby6kRP0selr_mxvaonNQLJR-sWtl845EX4qnP4rENbUcLftTky948ERqBorY9jLIK4w/exec";
-
-  const input = document.createElement("input");
-  input.type = "hidden";
-  input.name = "data";
-  input.value = dataString;
-
-  form.appendChild(input);
-  document.body.appendChild(form);
-
-  form.submit();
-}
-
-</script>
-
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;meta charset="utf-8"&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;title&gt;Survey&lt;/title&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  &lt;style&gt;</span></p>
+<p class="p1"><span class="s1">    body {</span></p>
+<p class="p1"><span class="s1">      font-family: Arial;</span></p>
+<p class="p1"><span class="s1">      max-width: 800px;</span></p>
+<p class="p1"><span class="s1">      margin: auto;</span></p>
+<p class="p1"><span class="s1">      padding: 20px;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    h2 {</span></p>
+<p class="p1"><span class="s1">      margin-top: 25px;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    p {</span></p>
+<p class="p1"><span class="s1">      margin-bottom: 15px;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    input, select {</span></p>
+<p class="p1"><span class="s1">      width: 100%;</span></p>
+<p class="p1"><span class="s1">      padding: 6px;</span></p>
+<p class="p1"><span class="s1">      margin-top: 5px;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    button {</span></p>
+<p class="p1"><span class="s1">      padding: 10px;</span></p>
+<p class="p1"><span class="s1">      margin-top: 10px;</span></p>
+<p class="p1"><span class="s1">      cursor: pointer;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    table {</span></p>
+<p class="p1"><span class="s1">      width: 100%;</span></p>
+<p class="p1"><span class="s1">      border-collapse: collapse;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    th, td {</span></p>
+<p class="p1"><span class="s1">      border-bottom: 1px solid #ddd;</span></p>
+<p class="p1"><span class="s1">      padding: 8px;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    .calendar-grid {</span></p>
+<p class="p1"><span class="s1">      display: grid;</span></p>
+<p class="p1"><span class="s1">      grid-template-columns: repeat(7, 1fr);</span></p>
+<p class="p1"><span class="s1">      gap: 5px;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    .day-header {</span></p>
+<p class="p1"><span class="s1">      text-align: center;</span></p>
+<p class="p1"><span class="s1">      font-weight: bold;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    .day {</span></p>
+<p class="p1"><span class="s1">      padding: 8px;</span></p>
+<p class="p1"><span class="s1">      border: 1px solid #ccc;</span></p>
+<p class="p1"><span class="s1">      text-align: center;</span></p>
+<p class="p1"><span class="s1">      cursor: pointer;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    .disabled {</span></p>
+<p class="p1"><span class="s1">      background: #f0f0f0;</span></p>
+<p class="p1"><span class="s1">      color: #bbb;</span></p>
+<p class="p1"><span class="s1">      border: 1px solid #eee;</span></p>
+<p class="p1"><span class="s1">      cursor: default;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    .selected {</span></p>
+<p class="p1"><span class="s1">      background: #ff6b6b;</span></p>
+<p class="p1"><span class="s1">      color: white;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p1"><span class="s1">  &lt;/style&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;body&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;h2&gt;Your Information&lt;/h2&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;label&gt;First Name&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1">&lt;input id="firstName"&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;label&gt;Last Name&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1">&lt;input id="lastName"&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;h2&gt;Select Unavailable Dates&lt;/h2&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;p&gt;</span></p>
+<p class="p1"><span class="s1">Please select all weekday dates between August and October when you are NOT available to meet in Toronto.</span></p>
+<p class="p1"><span class="s1">Click a date to mark it as unavailable. Click again to unselect.&lt;br&gt;&lt;br&gt;</span></p>
+<p class="p1"><span class="s1">Please disregard weekend dates.</span></p>
+<p class="p1"><span class="s1">&lt;/p&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;div id="calendar"&gt;&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;h2&gt;Contacts&lt;/h2&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;p&gt;</span></p>
+<p class="p1"><span class="s1">Please recommend individuals who you believe would be valuable contributors to this study.&lt;br&gt;&lt;br&gt;</span></p>
+<p class="p1"><span class="s1">For each person, indicate whether they would be best suited for the co-design workshop or the Delphi study, and provide their contact information.&lt;br&gt;&lt;br&gt;</span></p>
+<p class="p1"><span class="s1">You may add as many individuals as you wish.</span></p>
+<p class="p1"><span class="s1">&lt;/p&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;table&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;thead&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;tr&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;th&gt;Name&lt;/th&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;th&gt;Role&lt;/th&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;th&gt;Email&lt;/th&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;th&gt;Comments&lt;/th&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;/tr&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;/thead&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;tbody id="tableBody"&gt;&lt;/tbody&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/table&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;button onclick="addRow()"&gt;+ Add Person&lt;/button&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;br&gt;&lt;br&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;button onclick="submitData()"&gt;Submit&lt;/button&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;script&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">/* CALENDAR */</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">let selectedDates = [];</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function formatDate(date) {</span></p>
+<p class="p1"><span class="s1">  return date.toISOString().split("T")[0];</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function toggleDate(dateStr, el) {</span></p>
+<p class="p1"><span class="s1">  if (selectedDates.includes(dateStr)) {</span></p>
+<p class="p1"><span class="s1">    selectedDates = selectedDates.filter(d =&gt; d !== dateStr);</span></p>
+<p class="p1"><span class="s1">    el.classList.remove("selected");</span></p>
+<p class="p1"><span class="s1">  } else {</span></p>
+<p class="p1"><span class="s1">    selectedDates.push(dateStr);</span></p>
+<p class="p1"><span class="s1">    el.classList.add("selected");</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function renderMonth(name, start, end) {</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const container = document.getElementById("calendar");</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const title = document.createElement("h3");</span></p>
+<p class="p1"><span class="s1">  title.innerText = name + " 2026";</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const grid = document.createElement("div");</span></p>
+<p class="p1"><span class="s1">  grid.className = "calendar-grid";</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];</span></p>
+<p class="p1"><span class="s1">  days.forEach(d =&gt; {</span></p>
+<p class="p1"><span class="s1">    const cell = document.createElement("div");</span></p>
+<p class="p1"><span class="s1">    cell.className = "day-header";</span></p>
+<p class="p1"><span class="s1">    cell.innerText = d;</span></p>
+<p class="p1"><span class="s1">    grid.appendChild(cell);</span></p>
+<p class="p1"><span class="s1">  });</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const startDate = new Date(start);</span></p>
+<p class="p1"><span class="s1">  const endDate = new Date(end);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  // add blank cells for correct alignment</span></p>
+<p class="p1"><span class="s1">  for (let i = 0; i &lt; startDate.getDay(); i++) {</span></p>
+<p class="p1"><span class="s1">    grid.appendChild(document.createElement("div"));</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  let current = new Date(startDate);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  while (current &lt;= endDate) {</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    const el = document.createElement("div");</span></p>
+<p class="p1"><span class="s1">    const dateStr = formatDate(current);</span></p>
+<p class="p1"><span class="s1">    const day = current.getDay();</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    el.innerText = current.getDate();</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    // weekends disabled</span></p>
+<p class="p1"><span class="s1">    if (day === 0 || day === 6) {</span></p>
+<p class="p1"><span class="s1">      el.className = "day disabled";</span></p>
+<p class="p1"><span class="s1">    } else {</span></p>
+<p class="p1"><span class="s1">      el.className = "day";</span></p>
+<p class="p1"><span class="s1">      el.onclick = () =&gt; toggleDate(dateStr, el);</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    grid.appendChild(el);</span></p>
+<p class="p1"><span class="s1">    current.setDate(current.getDate() + 1);</span></p>
+<p class="p1"><span class="s1">  }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  container.appendChild(title);</span></p>
+<p class="p1"><span class="s1">  container.appendChild(grid);</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">renderMonth("August", "2026-08-01", "2026-08-31");</span></p>
+<p class="p1"><span class="s1">renderMonth("September", "2026-09-01", "2026-09-30");</span></p>
+<p class="p1"><span class="s1">renderMonth("October", "2026-10-01", "2026-10-31");</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">/* CONTACT TABLE */</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function addRow() {</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const table = document.getElementById("tableBody");</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const row = document.createElement("tr");</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  row.innerHTML = `</span></p>
+<p class="p1"><span class="s1">    &lt;td&gt;&lt;input class="name"&gt;&lt;/td&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;td&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;select class="role"&gt;</span></p>
+<p class="p1"><span class="s1">        &lt;option value=""&gt;Select&lt;/option&gt;</span></p>
+<p class="p1"><span class="s1">        &lt;option&gt;Co-design Workshop&lt;/option&gt;</span></p>
+<p class="p1"><span class="s1">        &lt;option&gt;Delphi Study&lt;/option&gt;</span></p>
+<p class="p1"><span class="s1">      &lt;/select&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;/td&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;td&gt;&lt;input class="email"&gt;&lt;/td&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;td&gt;&lt;input class="comments"&gt;&lt;/td&gt;</span></p>
+<p class="p1"><span class="s1">  `;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  table.appendChild(row);</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">addRow();</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">/* SUBMIT */</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function submitData() {</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const firstName = document.getElementById("firstName").value;</span></p>
+<p class="p1"><span class="s1">  const lastName = document.getElementById("lastName").value;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  let contacts = [];</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  document.querySelectorAll("#tableBody tr").forEach(row =&gt; {</span></p>
+<p class="p1"><span class="s1">    const name = row.querySelector(".name").value;</span></p>
+<p class="p1"><span class="s1">    const role = row.querySelector(".role").value;</span></p>
+<p class="p1"><span class="s1">    const email = row.querySelector(".email").value;</span></p>
+<p class="p1"><span class="s1">    const comments = row.querySelector(".comments").value;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    if (name || email) {</span></p>
+<p class="p1"><span class="s1">      contacts.push({ name, role, email, comments });</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p1"><span class="s1">  });</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const dataString = JSON.stringify({</span></p>
+<p class="p1"><span class="s1">    first_name: firstName,</span></p>
+<p class="p1"><span class="s1">    last_name: lastName,</span></p>
+<p class="p1"><span class="s1">    unavailable_dates: selectedDates.join(","),</span></p>
+<p class="p1"><span class="s1">    contacts: contacts</span></p>
+<p class="p1"><span class="s1">  });</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const form = document.createElement("form");</span></p>
+<p class="p1"><span class="s1">  form.method = "POST";</span></p>
+<p class="p1"><span class="s1">  form.action = "https://script.google.com/macros/s/AKfycby6kRP0selr_mxvaonNQLJR-sWtl845EX4qnP4rENbUcLftTky948ERqBorY9jLIK4w/exec";</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  const input = document.createElement("input");</span></p>
+<p class="p1"><span class="s1">  input.type = "hidden";</span></p>
+<p class="p1"><span class="s1">  input.name = "data";</span></p>
+<p class="p1"><span class="s1">  input.value = dataString;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  form.appendChild(input);</span></p>
+<p class="p1"><span class="s1">  document.body.appendChild(form);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  form.submit();</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;/script&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
 </body>
 </html>
