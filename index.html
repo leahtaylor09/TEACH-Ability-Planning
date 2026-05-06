@@ -5,33 +5,100 @@
   <title>Survey</title>
 
   <style>
-    body { font-family: Arial; max-width: 800px; margin: auto; padding: 20px; }
-    h2 { margin-top: 25px; }
-    p { margin-bottom: 15px; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+    }
 
-    input, select { width: 100%; padding: 6px; margin-top: 5px; }
-    button { padding: 10px; margin-top: 10px; cursor: pointer; }
+    h2 {
+      margin-top: 30px;
+    }
 
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border-bottom: 1px solid #ddd; padding: 8px; }
+    p {
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin-top: 15px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th {
+      background-color: #f5f5f5;
+      text-align: left;
+    }
+
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 8px;
+    }
+
+    /* CALENDAR */
+
+    .month {
+      margin-bottom: 25px;
+    }
 
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
+      gap: 6px;
     }
 
-    .day-header { text-align: center; font-weight: bold; }
+    .day-header {
+      text-align: center;
+      font-weight: bold;
+      font-size: 13px;
+    }
 
     .day {
-      padding: 8px;
+      padding: 10px;
       border: 1px solid #ccc;
       text-align: center;
       cursor: pointer;
+      border-radius: 4px;
+      background: white;
     }
 
-    .disabled { background: #f0f0f0; color: #bbb; cursor: default; }
-    .selected { background: #ff6b6b; color: white; }
+    .day:hover {
+      background: #f0f0f0;
+    }
+
+    .disabled {
+      background: #f5f5f5;
+      color: #bbb;
+      cursor: default;
+      border: 1px solid #eee;
+    }
+
+    .selected {
+      background: #ff6b6b;
+      color: white;
+      border-color: #ff6b6b;
+    }
+
   </style>
 </head>
 
@@ -61,7 +128,7 @@ Please disregard weekend dates.
 
 <p>
 Please recommend individuals who you believe would be valuable contributors to this study.<br><br>
-For each person, indicate whether they would be best suited for the co-design workshop or the Delphi study.<br><br>
+For each person, indicate whether they would be best suited for the co-design workshop or the Delphi study, and provide their contact information.<br><br>
 You may add as many individuals as you wish.
 </p>
 
@@ -79,11 +146,14 @@ You may add as many individuals as you wish.
 
 <button onclick="addRow()">+ Add Person</button>
 
-<br><br>
+<br>
 
 <button onclick="submitData()">Submit</button>
 
+
 <script>
+
+/* CALENDAR */
 
 let selectedDates = [];
 
@@ -104,6 +174,9 @@ function toggleDate(dateStr, el) {
 function renderMonth(name, start, end) {
 
   const container = document.getElementById("calendar");
+
+  const monthDiv = document.createElement("div");
+  monthDiv.className = "month";
 
   const title = document.createElement("h3");
   title.innerText = name + " 2026";
@@ -128,6 +201,7 @@ function renderMonth(name, start, end) {
   let current = new Date(startDate);
 
   while (current <= endDate) {
+
     const el = document.createElement("div");
     const dateStr = formatDate(current);
     const day = current.getDay();
@@ -145,8 +219,10 @@ function renderMonth(name, start, end) {
     current.setDate(current.getDate() + 1);
   }
 
-  container.appendChild(title);
-  container.appendChild(grid);
+  monthDiv.appendChild(title);
+  monthDiv.appendChild(grid);
+
+  container.appendChild(monthDiv);
 }
 
 renderMonth("August", "2026-08-01", "2026-08-31");
@@ -154,7 +230,10 @@ renderMonth("September", "2026-09-01", "2026-09-30");
 renderMonth("October", "2026-10-01", "2026-10-31");
 
 
+/* CONTACTS */
+
 function addRow() {
+
   const table = document.getElementById("tableBody");
 
   const row = document.createElement("tr");
@@ -177,6 +256,8 @@ function addRow() {
 
 addRow();
 
+
+/* SUBMIT */
 
 function submitData() {
 
